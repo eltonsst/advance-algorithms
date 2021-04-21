@@ -1,14 +1,31 @@
 package example
 
+import breeze.plot.{plot, Figure}
 import example.graph.Graph._
-import breeze.plot._
+import example.graph.MST._
+import example.util.Util.time
+
+import scala.collection.mutable.ArrayBuffer
 
 object Main extends App {
+  def run(): Unit = {
+    val buffer    = ArrayBuffer[(Double, Int)]()
+    val totalTime = time {
+      loadFromFile("mst_dataset/").foreach { graph =>
+        val mst = time(heapPrim(graph))
+        println(s"mst keys: ${mst._2.keys.size}, time: ${mst._1} ms")
+        buffer.append((mst._1, mst._2.keys.size))
+      }
+    }
 
-  val g   = loadFromFile("mst_dataset/input_random_02_10.txt")
-  val fig = Figure()
-  val plt = fig.subplot(0)
-  plt += plot((1 :: 2 :: 3 :: 4 :: Nil).map(_.toDouble), (1 :: 2 :: 3 :: 4 :: Nil).map(_.toDouble))
-  fig.saveas("test_graph.pdf")
-  println(s"numVer = ${numVertices(g)}, numE = ${numEdges(g)}, al= ${g.adjacencyList}")
+    println(s"Total time execution: ${totalTime._1} ms")
+
+    val heapFigure = Figure()
+    val plt        = heapFigure.subplot(0)
+    plt += plot(buffer.map(_._2.toDouble).toSeq, buffer.map(_._1).toSeq)
+    heapFigure.saveas("heap-plot.pdf")
+  }
+
+  run()
+
 }

@@ -8,3 +8,11 @@ lazy val root = (project in file(".")).settings(name := "ex1aa")
 libraryDependencies  ++= Seq(
   "org.scalanlp" %% "breeze-viz" % "1.2"
 )
+/*
+fork := true
+
+javaOptions ++= Seq(
+  "-verbose:gc"
+)
+
+ */

@@ -19,4 +19,10 @@ trait Heap[K, V] {
     * @return a pair of the removed [[Entry]] and the new [[Heap]]
     */
   def extractMin: (Option[Entry[K, V]], Heap[K, V])
+
+  /** Update the key for the given value.
+    * If the given key is >= than the current one,
+    * no work is done and the heap is left unchanged.
+    */
+  def decreaseKey(value: V, newKey: K): Heap[K, V]
 }
