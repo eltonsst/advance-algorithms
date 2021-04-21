@@ -33,7 +33,7 @@ object MST {
     }
 
   @tailrec
-  private def ricHeapPrim(heap: Heap[Int, Int], graph: Graph, mst: MST): MST =
+  private def recHeapPrim(heap: Heap[Int, Int], graph: Graph, mst: MST): MST =
     if (heap.isEmpty) mst
     else {
       // let u be the min extracted from the heap
@@ -42,7 +42,7 @@ object MST {
       val edgesAdjacentToU                  = getAdjacencyList(graph, maybeU.get.value)
       // update state of the heap and current MST
       val (mstAfterUpdate, heapAfterUpdate) = updateHeap(edgesAdjacentToU, heapAfterExtraction, maybeU.get, mst)
-      ricHeapPrim(heapAfterUpdate, graph, mstAfterUpdate)
+      recHeapPrim(heapAfterUpdate, graph, mstAfterUpdate)
     }
 
   def heapPrim(graph: Graph, s: Int = 1): MST = {
@@ -51,7 +51,29 @@ object MST {
     // heap is the priority queue, contains all nodes not in the tree
     val heap    = VectorHeap(entries)
     // build mst recursively
-    val mst     = ricHeapPrim(heap, graph, Map.empty)
+    val mst     = recHeapPrim(heap, graph, Map.empty)
+    mst
+  }
+
+
+  @tailrec
+  private def recNaiveKruskal(graph: Graph, edges: Seq[Edge]) : Graph = {
+    if(edges.isEmpty) graph
+    else {
+      if(isCyclic(graph, edges.head)) {
+        // if the graph is cyclic then ignore the selected edge
+        recNaiveKruskal(graph, edges.tail)
+      } else {
+        // otherwise add the edge to the graph
+        recNaiveKruskal(Graph(graph.vertices, graph.edges :+ edges.head), edges.tail)
+      }
+    }
+  }
+
+  def naiveKruskal(graph: Graph): Graph = {
+    val graphAfterSort = sortedGraph(graph)  // build a graph with sorted edges O(n * log n)
+    val bufferGraph = Graph(graphAfterSort.vertices, Nil) // used to check if cyclic O(k)
+    val mst = recNaiveKruskal(bufferGraph, graphAfterSort.edges)
     mst
   }
 }

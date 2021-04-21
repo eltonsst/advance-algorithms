@@ -8,7 +8,7 @@ import example.util.Util.time
 import scala.collection.mutable.ArrayBuffer
 
 object Main extends App {
-  def run(): Unit = {
+  def runPrim(): Unit = {
     val buffer    = ArrayBuffer[(Double, Int)]()
     val totalTime = time {
       loadFromFile("mst_dataset/").foreach { graph =>
@@ -26,6 +26,26 @@ object Main extends App {
     heapFigure.saveas("heap-plot.pdf")
   }
 
-  run()
+  def runKruskal(): Unit = {
+    val buffer    = ArrayBuffer[(Double, Int)]()
+    val totalTime = time {
+      loadFromFile("mst_dataset/").foreach { graph =>
+        val mst = time(naiveKruskal(graph))
+        println(s"num vertices: ${numVertices(graph)}, time: ${mst._1} ms")
+        buffer.append((mst._1, numVertices(graph)))
+      }
+    }
+
+    println(s"Total time execution: ${totalTime._1} ms")
+
+    val heapFigure = Figure()
+    val plt        = heapFigure.subplot(0)
+    plt += plot(buffer.map(_._2.toDouble).toSeq, buffer.map(_._1).toSeq)
+    heapFigure.saveas("kruskal-naive-plot.pdf")
+  }
+
+  // runPrim()
+
+  runKruskal()
 
 }

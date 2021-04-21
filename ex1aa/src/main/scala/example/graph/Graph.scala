@@ -48,4 +48,16 @@ object Graph {
     gs
   }
 
+  def sortedGraph(graph: Graph) : Graph = buildGraph(graph.edges.sortBy(_.w))
+
+  def isCyclic(graph: Graph, edge: Edge) : Boolean = {
+    // pre condition: graph is acyclic
+    // if the graph has no edges just return false obv
+    if(graph.edges.isEmpty) false
+    else {
+      // otherwise, does the new edge close a cycle?
+      graph.edges.exists(e => e.v == edge.v || e.u == edge.v) // if exist then is cyclic
+    }
+  }
+
 }
