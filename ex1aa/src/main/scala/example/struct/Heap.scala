@@ -7,7 +7,8 @@ case class Entry[K, V](key: K, value: V)
 trait Heap[K, V] {
   def size: Int
   def isEmpty: Boolean
-
+  def key(v: V) : K
+  def exist(v: V) : Option[Int]
   /** Insert the given key-value pair into the heap
     * @param key the key
     * @param value the value

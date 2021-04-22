@@ -1,6 +1,7 @@
 package example.struct
 
 import scala.annotation.tailrec
+import scala.util.Try
 
 class VectorHeap[K: Ordering, V] private (vector: Vector[Entry[K, V]], map: Map[V, Int]) extends Heap[K, V] {
   private val keyOrdering = implicitly[Ordering[K]]
@@ -22,6 +23,7 @@ class VectorHeap[K: Ordering, V] private (vector: Vector[Entry[K, V]], map: Map[
     * @return the index were the entry was inserted and the new heap state
     */
   private def append(entry: Entry[K, V], state: State): (Int, State) =
+    // append on vector is O(eC) "effectively constant", operation on map are O(C)
     (state.vector.size, State(state.vector :+ entry, state.map + (entry.value -> vector.size)))
 
   private def hasParent(index: Int): Boolean                         = index > 0
@@ -37,11 +39,12 @@ class VectorHeap[K: Ordering, V] private (vector: Vector[Entry[K, V]], map: Map[
 
   @tailrec
   private def bubbleUp(insertedIndex: Int, entry: Entry[K, V], stateAfterAppend: State): State =
-    if (hasParent(insertedIndex)) {
-      val parentIndex = getParentIndex(insertedIndex)
-      val parent      = stateAfterAppend.vector(parentIndex)
-      if (keyOrdering.compare(parent.key, entry.key) > 0) {
+    if (hasParent(insertedIndex)) { // O(eC)
+      val parentIndex = getParentIndex(insertedIndex) // O(eC)
+      val parent      = stateAfterAppend.vector(parentIndex) // O(eC)
+      if (keyOrdering.compare(parent.key, entry.key) > 0) { // O(C)
         // swap until the vector is ordered
+        // worst case is the height of the tree
         bubbleUp(parentIndex, entry, swap(insertedIndex, parentIndex, stateAfterAppend))
       } else {
         stateAfterAppend
@@ -62,11 +65,11 @@ class VectorHeap[K: Ordering, V] private (vector: Vector[Entry[K, V]], map: Map[
       // If value already exists in heap, do nothing.
       this
     } else {
-      val entry                             = Entry(key, value)
+      val entry                             = Entry(key, value) // O(C)
       // breaking heap property
-      val (insertedIndex, stateAfterAppend) = append(entry, state)
+      val (insertedIndex, stateAfterAppend) = append(entry, state) // O(eC)
       // restoring heap property
-      val stateAfterBubbling                = bubbleUp(insertedIndex, entry, stateAfterAppend)
+      val stateAfterBubbling                = bubbleUp(insertedIndex, entry, stateAfterAppend) // O(log numVertices)
       updated(stateAfterBubbling)
     }
 
@@ -80,6 +83,7 @@ class VectorHeap[K: Ordering, V] private (vector: Vector[Entry[K, V]], map: Map[
 
   @tailrec
   private def bubbleDown(index: Int, entry: Entry[K, V], stateAfterRemove: State): State = {
+    // until has child
     val childIndices = getChildIndices(index, stateAfterRemove.vector)
     if (heapPropertyViolated(entry.key, childIndices, stateAfterRemove.vector)) {
       val minChildIndex  = childIndices.minBy(stateAfterRemove.vector(_).key)
@@ -100,22 +104,23 @@ class VectorHeap[K: Ordering, V] private (vector: Vector[Entry[K, V]], map: Map[
       (None, this)
     } else {
       // Swap the root and the last leaf
-      val stateAfterSwap = swap(0, vector.size - 1, state)
+      val stateAfterSwap = swap(0, vector.size - 1, state) // O(eC)
 
       // Remove the old root, which is now at the end of the array
-      val (root, stateAfterRemove) = delete(vector.size - 1, stateAfterSwap)
+      val (root, stateAfterRemove) = delete(vector.size - 1, stateAfterSwap) //O(eC)
 
       // Bubble-down the new root until heap property is restored
       val stateAfterBubbleDown = {
         val oldVector = stateAfterRemove.vector
         if (oldVector.nonEmpty)
-          bubbleDown(0, oldVector(0), stateAfterRemove)
+          bubbleDown(0, oldVector(0), stateAfterRemove) // O(log n)
         else
           stateAfterRemove
       }
 
       // Return the old root
       (Some(root), updated(stateAfterBubbleDown))
+      //(Some(vector(0)), updated(State(vector.tail, map - vector(0).value)))
     }
 
   private def delete(index: Int, oldState: State): (Entry[K, V], State) = {
@@ -140,13 +145,17 @@ class VectorHeap[K: Ordering, V] private (vector: Vector[Entry[K, V]], map: Map[
       val updatedVector = vector.updated(index, updatedEntry)
 
       // Because key has got smaller, bubble-up the entry to its new home
-      val stateAfterBubbleUp = bubbleUp(index, updatedEntry, State(updatedVector, map))
+      val stateAfterBubbleUp = bubbleUp(index, updatedEntry, State(updatedVector, map)) // O(log n)
 
       updated(stateAfterBubbleUp)
     } getOrElse {
       // Unknown value. Return the original heap
       this
     }
+
+  override def key(v: V): K = vector(map(v)).key
+
+  override def exist(v: V): Option[Int] = map.get(v)
 }
 
 object VectorHeap {

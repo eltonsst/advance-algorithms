@@ -14,14 +14,16 @@ object App extends LazyLogging {
     val totalTime = time {
       loadFromFile().foreach { graph =>
         val mst = time(heapPrim(graph))
-        logger.info(s"mst keys: ${mst._2.keys.size}, time: ${mst._1} ms")
-        buffer.append((mst._1, mst._2.keys.size))
+        logger.info(s"mst vertices: ${mst._2.vertices.size}, time: ${mst._1} ms")
+        buffer.append((mst._1, mst._2.vertices.size))
+        //logger.info(s"result mst is: ${mst._2.edges}")
       }
     }
 
     logger.info(s"Total time execution: ${totalTime._1} ms")
 
     val heapFigure = Figure()
+    heapFigure.visible = false
     val plt        = heapFigure.subplot(0)
     plt += plot(buffer.map(_._2.toDouble).toSeq, buffer.map(_._1).toSeq)
     heapFigure.saveas("heap-plot.pdf")
@@ -47,7 +49,7 @@ object App extends LazyLogging {
   }
 
   def main(args: Array[String]): Unit =
-    // runPrim()
-    runKruskal()
+     runPrim()
+    //runKruskal()
 
 }

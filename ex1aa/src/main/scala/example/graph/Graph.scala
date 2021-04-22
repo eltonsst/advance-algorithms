@@ -21,9 +21,13 @@ object Graph extends LazyLogging {
   def getAdjacencyList(graph: Graph, v: Int): (Int, Seq[Edge]) = (v, graph.adjacencyList(v))
 
   def buildGraph(edgeList: Seq[Edge]): Graph = {
-    val vertices      = edgeList.map(_.u).distinct
-    val adjacencyList = edgeList.groupBy(_.u)
-    Graph(vertices, edgeList, adjacencyList)
+    val vertices      = edgeList.flatMap(e => Seq(e.v, e.u)).distinct
+    val adjacencyList1 = edgeList.groupBy(_.u)
+    val adjacencyList2 = edgeList
+      .map(e => Edge(u = e.v, v = e.u, w = e.w))
+      .groupBy(_.u)
+      .filter(a => !adjacencyList1.contains(a._1))
+    Graph(vertices, edgeList, adjacencyList1 ++ adjacencyList2)
   }
 
   /** Load vertices and edges from mst dataset of [[https://github.com/beaunus/stanford-algs/]]
