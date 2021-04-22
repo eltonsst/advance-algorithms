@@ -6,13 +6,8 @@ ThisBuild / organizationName := "example"
 lazy val root = (project in file(".")).settings(name := "ex1aa")
 
 libraryDependencies  ++= Seq(
-  "org.scalanlp" %% "breeze-viz" % "1.2"
+  "org.scalanlp"               %% "breeze-viz"      % "1.2",
+  "com.typesafe.scala-logging" %% "scala-logging"   % "3.9.2",
+  "ch.qos.logback"             %  "logback-classic" % "1.2.3", // required by scala-logging
+  "com.lihaoyi"                %% "os-lib"          % "0.7.3"
 )
-/*
-fork := true
-
-javaOptions ++= Seq(
-  "-verbose:gc"
-)
-
- */

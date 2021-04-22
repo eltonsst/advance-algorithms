@@ -1,8 +1,7 @@
 package example.graph
 
+import com.typesafe.scalalogging.LazyLogging
 import example.graph.Graph.AdjacencyList
-
-import scala.io.Source
 
 /** Basic immutable undirected graph class
   *
@@ -13,7 +12,7 @@ import scala.io.Source
   */
 case class Graph(vertices: Seq[Int], edges: Seq[Edge], adjacencyList: AdjacencyList = Map.empty)
 
-object Graph {
+object Graph extends LazyLogging {
   private type AdjacencyList = Map[Int, Seq[Edge]]
 
   def numVertices(graph: Graph): Int                           = graph.vertices.length
@@ -28,36 +27,31 @@ object Graph {
   }
 
   /** Load vertices and edges from mst dataset of [[https://github.com/beaunus/stanford-algs/]]
-    * @param path path to dataset resource
     * @return A new [[Graph]]
     */
-  def loadFromFile(path: String): Seq[Graph] = {
-    val gs = Source.fromResource(path).getLines().toSeq.map { file =>
-      val bufferedSource = Source.fromResource(path + file)
-      val lines          = bufferedSource.getLines().toSeq
-
+  def loadFromFile(): Seq[Graph] = {
+    val wd = os.pwd / "src" / "main" / "resources" / "mst_dataset"
+    os.list(wd).map { file =>
+      logger.info(s"loading $file")
+      val lines = os.read.lines(file)
       val edges = lines
         .map(_.split(" "))
         .filter(_.length > 2)
         .map(_.map(_.toInt))
         .map(arr => Edge(arr(0), arr(1), arr(2)))
-
-      bufferedSource.close
       Graph.buildGraph(edges)
     }
-    gs
   }
 
-  def sortedGraph(graph: Graph) : Graph = buildGraph(graph.edges.sortBy(_.w))
+  def sortedGraph(graph: Graph): Graph = buildGraph(graph.edges.sortBy(_.w))
 
-  def isCyclic(graph: Graph, edge: Edge) : Boolean = {
+  def isCyclic(graph: Graph, edge: Edge): Boolean =
     // pre condition: graph is acyclic
     // if the graph has no edges just return false obv
-    if(graph.edges.isEmpty) false
+    if (graph.vertices.isEmpty) false // O(1)
     else {
       // otherwise, does the new edge close a cycle?
-      graph.edges.exists(e => e.v == edge.v || e.u == edge.v) // if exist then is cyclic
+      graph.vertices.contains(edge.v) // if exist then is cyclic // O(numVertices)
     }
-  }
 
 }

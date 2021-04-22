@@ -55,25 +55,23 @@ object MST {
     mst
   }
 
-
   @tailrec
-  private def recNaiveKruskal(graph: Graph, edges: Seq[Edge]) : Graph = {
-    if(edges.isEmpty) graph
+  private def recNaiveKruskal(graph: Graph, edges: Seq[Edge]): Graph =
+    if (edges.isEmpty) graph
     else {
-      if(isCyclic(graph, edges.head)) {
+      if (isCyclic(graph, edges.head)) { // O(n)
         // if the graph is cyclic then ignore the selected edge
         recNaiveKruskal(graph, edges.tail)
       } else {
         // otherwise add the edge to the graph
-        recNaiveKruskal(Graph(graph.vertices, graph.edges :+ edges.head), edges.tail)
+        recNaiveKruskal(Graph(graph.vertices :+ edges.head.v, graph.edges :+ edges.head), edges.tail)
       }
     }
-  }
 
   def naiveKruskal(graph: Graph): Graph = {
-    val graphAfterSort = sortedGraph(graph)  // build a graph with sorted edges O(n * log n)
-    val bufferGraph = Graph(graphAfterSort.vertices, Nil) // used to check if cyclic O(k)
-    val mst = recNaiveKruskal(bufferGraph, graphAfterSort.edges)
+    val graphAfterSort = sortedGraph(graph)                                 // build a graph with sorted edges O(n * log n)
+    val bufferGraph    = Graph(Nil, Nil)                                    // used to check if cyclic O(k)
+    val mst            = recNaiveKruskal(bufferGraph, graphAfterSort.edges) // O(n * n)
     mst
   }
 }
