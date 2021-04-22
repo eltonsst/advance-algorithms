@@ -3,6 +3,7 @@ package example.graph
 import example.struct.{Entry, Heap, VectorHeap}
 import Graph._
 
+import scala.+:
 import scala.annotation.tailrec
 
 /** Functions to create a minimum spanning tree for undirected weighted graphs.
@@ -59,19 +60,19 @@ object MST {
   private def recNaiveKruskal(graph: Graph, edges: Seq[Edge]): Graph =
     if (edges.isEmpty) graph
     else {
-      if (isCyclic(graph, edges.head)) { // O(n)
+      if (isCyclic(graph, edges.head)) { // O(numVertices)
         // if the graph is cyclic then ignore the selected edge
         recNaiveKruskal(graph, edges.tail)
       } else {
-        // otherwise add the edge to the graph
-        recNaiveKruskal(Graph(graph.vertices :+ edges.head.v, graph.edges :+ edges.head), edges.tail)
+        // otherwise add the edge to the graph, important: prepend on the list!
+        recNaiveKruskal(Graph(edges.head.v +: graph.vertices  , edges.head +: graph.edges), edges.tail)
       }
     }
 
   def naiveKruskal(graph: Graph): Graph = {
-    val graphAfterSort = sortedGraph(graph)                                 // build a graph with sorted edges O(n * log n)
-    val bufferGraph    = Graph(Nil, Nil)                                    // used to check if cyclic O(k)
-    val mst            = recNaiveKruskal(bufferGraph, graphAfterSort.edges) // O(n * n)
+    val graphAfterSort = sortedGraph(graph)                                 // TimSort O(numEdges * log(numEdges))
+    val bufferMst    = Graph(1 :: Nil, Nil)                               // used to check if cyclic O(k)
+    val mst            = recNaiveKruskal(bufferMst, graphAfterSort.edges) // O(numEdges * numVertices)
     mst
   }
 }

@@ -32,7 +32,7 @@ object App extends LazyLogging {
     val totalTime = time {
       loadFromFile().foreach { graph =>
         val mst = time(naiveKruskal(graph))
-        logger.info(s"num vertices: ${numVertices(graph)}, time: ${mst._1} ms")
+        logger.info(s"num vertices of mst: ${numVertices(mst._2)}, time: ${mst._1} ms")
         buffer.append((mst._1, numVertices(graph)))
       }
     }
