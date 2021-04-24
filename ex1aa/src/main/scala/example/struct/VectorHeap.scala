@@ -40,7 +40,7 @@ class VectorHeap[K: Ordering, V] private (vector: Vector[Entry[K, V]], map: Map[
   @tailrec
   private def bubbleUp(insertedIndex: Int, entry: Entry[K, V], stateAfterAppend: State): State =
     if (hasParent(insertedIndex)) { // O(eC)
-      val parentIndex = getParentIndex(insertedIndex) // O(eC)
+      val parentIndex = getParentIndex(insertedIndex)        // O(eC)
       val parent      = stateAfterAppend.vector(parentIndex) // O(eC)
       if (keyOrdering.compare(parent.key, entry.key) > 0) { // O(C)
         // swap until the vector is ordered
@@ -65,9 +65,9 @@ class VectorHeap[K: Ordering, V] private (vector: Vector[Entry[K, V]], map: Map[
       // If value already exists in heap, do nothing.
       this
     } else {
-      val entry                             = Entry(key, value) // O(C)
+      val entry                             = Entry(key, value)                                // O(C)
       // breaking heap property
-      val (insertedIndex, stateAfterAppend) = append(entry, state) // O(eC)
+      val (insertedIndex, stateAfterAppend) = append(entry, state)                             // O(eC)
       // restoring heap property
       val stateAfterBubbling                = bubbleUp(insertedIndex, entry, stateAfterAppend) // O(log numVertices)
       updated(stateAfterBubbling)

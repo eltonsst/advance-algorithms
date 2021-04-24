@@ -8,7 +8,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection.mutable.ArrayBuffer
 
-object App extends LazyLogging {
+object HeapPrim extends LazyLogging {
   def runPrim(): Unit = {
     val buffer    = ArrayBuffer[(Double, Int)]()
     val totalTime = time {
@@ -16,7 +16,7 @@ object App extends LazyLogging {
         val mst = time(heapPrim(graph))
         logger.info(s"mst vertices: ${mst._2.vertices.size}, time: ${mst._1} ms")
         buffer.append((mst._1, mst._2.vertices.size))
-        //logger.info(s"result mst is: ${mst._2.edges}")
+      //logger.info(s"result mst is: ${mst._2.edges}")
       }
     }
 
@@ -29,27 +29,6 @@ object App extends LazyLogging {
     heapFigure.saveas("heap-plot.pdf")
   }
 
-  def runKruskal(): Unit = {
-    val buffer    = ArrayBuffer[(Double, Int)]()
-    val totalTime = time {
-      loadFromFile().foreach { graph =>
-        val mst = time(naiveKruskal(graph))
-        logger.info(s"num vertices of mst: ${numVertices(mst._2)}, time: ${mst._1} ms")
-        buffer.append((mst._1, numVertices(graph)))
-      }
-    }
-
-    logger.info(s"Total time execution: ${totalTime._1} ms")
-
-    val heapFigure = Figure()
-    heapFigure.visible = false
-    val plt        = heapFigure.subplot(0)
-    plt += plot(buffer.map(_._2.toDouble).toSeq, buffer.map(_._1).toSeq)
-    heapFigure.saveas("kruskal-naive-plot.pdf")
-  }
-
-  def main(args: Array[String]): Unit =
-     runPrim()
-    //runKruskal()
+  def main(args: Array[String]): Unit = runPrim()
 
 }

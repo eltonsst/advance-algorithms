@@ -21,7 +21,7 @@ object Graph extends LazyLogging {
   def getAdjacencyList(graph: Graph, v: Int): (Int, Seq[Edge]) = (v, graph.adjacencyList(v))
 
   def buildGraph(edgeList: Seq[Edge]): Graph = {
-    val vertices      = edgeList.flatMap(e => Seq(e.v, e.u)).distinct
+    val vertices       = edgeList.flatMap(e => Seq(e.v, e.u)).distinct
     val adjacencyList1 = edgeList.groupBy(_.u)
     val adjacencyList2 = edgeList
       .map(e => Edge(u = e.v, v = e.u, w = e.w))
