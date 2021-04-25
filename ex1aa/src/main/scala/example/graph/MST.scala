@@ -62,22 +62,26 @@ object MST extends LazyLogging {
   }
 
   @tailrec
-  private def recNaiveKruskal(graph: Graph, edges: Seq[Edge]): Graph =
-    if (edges.isEmpty) graph
+  private def recNaiveKruskal(mst: Graph, graph: Graph): Graph =
+    if (graph.edges.isEmpty) mst // O(k)
     else {
-      if (isCyclic(graph, edges.head)) { // O(numVertices)
+      if (isCyclic(mst, graph.edges.head)) { // O(numVertices * numEdges)
         // if the graph is cyclic then ignore the selected edge
-        recNaiveKruskal(graph, edges.tail)
+        recNaiveKruskal(mst, Graph(graph.vertices, graph.edges.tail, graph.adjacencyList))
       } else {
         // otherwise add the edge to the graph, important: prepend on the list!
-        recNaiveKruskal(Graph(edges.head.v +: graph.vertices, edges.head +: graph.edges), edges.tail)
+        recNaiveKruskal(
+          buildGraph(graph.edges.head +: mst.edges), // O(numEdges * numEdges)
+          Graph(graph.vertices, graph.edges.tail, graph.adjacencyList)
+        )
       }
     }
 
   def naiveKruskal(graph: Graph): Graph = {
     val graphAfterSort = sortedGraph(graph)                               // TimSort O(numEdges * log(numEdges))
-    val bufferMst      = Graph(1 :: Nil, Nil)                             // used to check if cyclic O(k)
-    val mst            = recNaiveKruskal(bufferMst, graphAfterSort.edges) // O(numEdges * numVertices)
+    val bufferMst      = Graph(Nil, Nil)                                  // used to check if cyclic O(k)
+    val mst            = recNaiveKruskal(bufferMst, graphAfterSort)       // O(numEdges * numVertices)
+    //println(s"result mst is: ${mst.edges}")
     mst
   }
 

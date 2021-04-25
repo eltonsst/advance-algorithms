@@ -3,6 +3,8 @@ package example.graph
 import com.typesafe.scalalogging.LazyLogging
 import example.graph.Graph.AdjacencyList
 
+import scala.annotation.tailrec
+
 /** Basic immutable undirected graph class
   *
   * @constructor Create a new [[Graph]]
@@ -22,12 +24,18 @@ object Graph extends LazyLogging {
 
   def buildGraph(edgeList: Seq[Edge]): Graph = {
     val vertices       = edgeList.flatMap(e => Seq(e.v, e.u)).distinct
-    val adjacencyList1 = edgeList.groupBy(_.u)
+    val adjacencyList1 = collection.mutable.Map() ++= edgeList.groupBy(_.u)
     val adjacencyList2 = edgeList
       .map(e => Edge(u = e.v, v = e.u, w = e.w))
       .groupBy(_.u)
-      .filter(a => !adjacencyList1.contains(a._1))
-    Graph(vertices, edgeList, adjacencyList1 ++ adjacencyList2)
+
+    adjacencyList2.foreach(a => {
+      if(adjacencyList1.contains(a._1)) adjacencyList1(a._1) = adjacencyList1(a._1) ++ a._2
+      else adjacencyList1 += a
+    })
+
+
+    Graph(vertices, edgeList, Map.from(adjacencyList1))
   }
 
   /** Load vertices and edges from mst dataset of [[https://github.com/beaunus/stanford-algs/]]
@@ -47,15 +55,21 @@ object Graph extends LazyLogging {
     }
   }
 
-  def sortedGraph(graph: Graph): Graph = buildGraph(graph.edges.sortBy(_.w))
+  def sortedGraph(graph: Graph): Graph = Graph(graph.vertices, graph.edges.sortBy(_.w), graph.adjacencyList)
 
-  def isCyclic(graph: Graph, edge: Edge): Boolean =
-    // pre condition: graph is acyclic
-    // if the graph has no edges just return false obv
-    if (graph.vertices.isEmpty) false // O(1)
+  def dfs(vertices: Map[Int,Int], adjacencyList: AdjacencyList, u: Int, visited: Map[Int, Int]): Map[Int, Int] = {
+    if(visited.contains(u)) visited // O(K)
+    else if(!vertices.contains(u)) visited // O(k)
+    else adjacencyList(u).foldLeft(visited + (u -> u))((updatedVisited, e) => dfs(vertices, adjacencyList, e.v, updatedVisited))
+  }
+
+  def isCyclic(graph: Graph, edge: Edge): Boolean = {
+    if(graph.edges.isEmpty) false
     else {
-      // otherwise, does the new edge close a cycle?
-      graph.vertices.contains(edge.v) // if exist then is cyclic // O(numVertices)
+      val vertexMap = graph.vertices.map(v => (v, v)).toMap // O(n)
+      val result = dfs(vertexMap, graph.adjacencyList, edge.u, Map.empty) // O(numEdges)
+      result.contains(edge.v)
     }
+  }
 
 }
