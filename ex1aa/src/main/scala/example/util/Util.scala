@@ -5,7 +5,7 @@ object Util {
     val t0      = System.nanoTime()
     val result  = block
     val t1      = System.nanoTime()
-    val elapsed = Math.floor((t1 - t0) / Math.pow(10, 6))
+    val elapsed = BigDecimal(t1 - t0).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble / Math.pow(10, 6)
     (elapsed, result)
   }
 }

@@ -23,19 +23,13 @@ object Graph extends LazyLogging {
   def getAdjacencyList(graph: Graph, v: Int): (Int, Seq[Edge]) = (v, graph.adjacencyList(v))
 
   def buildGraph(edgeList: Seq[Edge]): Graph = {
-    val vertices       = edgeList.flatMap(e => Seq(e.v, e.u)).distinct
-    val adjacencyList1 = collection.mutable.Map() ++= edgeList.groupBy(_.u)
-    val adjacencyList2 = edgeList
-      .map(e => Edge(u = e.v, v = e.u, w = e.w))
-      .groupBy(_.u)
+    val vertices       = edgeList.flatMap(e => Seq(e.v, e.u)).distinct // O(n)
+    val adjacencyList1 = edgeList.groupBy(_.u).toSeq // O(n)
+    val adjacencyList2 = edgeList.map(e => Edge(u = e.v, v = e.u, w = e.w)).groupBy(_.u).toSeq // O(n)
+    val adjacencyList3 = adjacencyList1 ++ adjacencyList2 // O(n)
+    val adjacencyList4 = adjacencyList3.flatMap(_._2).groupBy(_.u) // O(n)
 
-    adjacencyList2.foreach(a => {
-      if(adjacencyList1.contains(a._1)) adjacencyList1(a._1) = adjacencyList1(a._1) ++ a._2
-      else adjacencyList1 += a
-    })
-
-
-    Graph(vertices, edgeList, Map.from(adjacencyList1))
+    Graph(vertices, edgeList, adjacencyList4)
   }
 
   /** Load vertices and edges from mst dataset of [[https://github.com/beaunus/stanford-algs/]]
@@ -57,17 +51,16 @@ object Graph extends LazyLogging {
 
   def sortedGraph(graph: Graph): Graph = Graph(graph.vertices, graph.edges.sortBy(_.w), graph.adjacencyList)
 
-  def dfs(vertices: Map[Int,Int], adjacencyList: AdjacencyList, u: Int, visited: Map[Int, Int]): Map[Int, Int] = {
+  def dfs(adjacencyList: AdjacencyList, u: Int, visited: Map[Int, Int]): Map[Int, Int] = {
     if(visited.contains(u)) visited // O(K)
-    else if(!vertices.contains(u)) visited // O(k)
-    else adjacencyList(u).foldLeft(visited + (u -> u))((updatedVisited, e) => dfs(vertices, adjacencyList, e.v, updatedVisited))
+    else if(!adjacencyList.contains(u)) visited // O(k)
+    else adjacencyList(u).foldLeft(visited + (u -> u))((updatedVisited, e) => dfs(adjacencyList, e.v, updatedVisited))
   }
 
   def isCyclic(graph: Graph, edge: Edge): Boolean = {
     if(graph.edges.isEmpty) false
     else {
-      val vertexMap = graph.vertices.map(v => (v, v)).toMap // O(n)
-      val result = dfs(vertexMap, graph.adjacencyList, edge.u, Map.empty) // O(numEdges)
+      val result = dfs(graph.adjacencyList, edge.u, Map.empty) // O(numEdges)
       result.contains(edge.v)
     }
   }

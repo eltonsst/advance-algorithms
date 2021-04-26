@@ -14,9 +14,11 @@ object NaiveKruskal extends LazyLogging {
     val buffer    = ArrayBuffer[(Double, Int)]()
     val totalTime = time {
       loadFromFile().foreach { graph =>
+        val numV = numVertices(graph)
         val mst = time(naiveKruskal(graph))
-        logger.info(s"num vertices of mst: ${numVertices(mst._2)}, time: ${mst._1} ms")
-        buffer.append((mst._1, numVertices(graph)))
+        logger.info(s"num vertices of mst: ${numV}, time: ${mst._1} ms")
+        logger.info(s"mst weight ${mst._2.edges.map(_.w).sum}")
+        buffer.append((mst._1, numV))
       }
     }
 
