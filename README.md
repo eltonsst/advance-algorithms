@@ -283,19 +283,19 @@ Per quanto riguarda l'implementazione, alcune note degne di menzione possono ess
 
 ### Kruskal naive
 
-![Alt text](ex1aa/kruskal-naive.png?raw=true "Kruskal Naive")
+![Kruskal naive](ex1aa/kruskal-naive.png?raw=true "Kruskal Naive")
 
 ---
 
 ### Kruskal Union Find
 
-![Alt text](ex1aa/kruskal-uf-plot.png?raw=true "Kruskal Union Find")
+![Kruskal Union Find](ex1aa/kruskal-uf-plot.png?raw=true "Kruskal Union Find")
 
 ---
 
 ### Heap Prim
 
-![Alt text](ex1aa/heap-prim.png?raw=true "Heap Prim")
+![Heap Prim](ex1aa/heap-prim.png?raw=true "Heap Prim")
 
 ## Conclusioni
 
@@ -307,4 +307,4 @@ Ciò può essere spiegato dal fatto che heap prim utilizza in modo più estensiv
 Infine, è importante ricordare che anche il linguaggio gioca una parte importante e sicuramente l'allocazione di molti oggetti rende certe operazioni più onerose.
 Potrebbe essere interessante confrontare questi risultati con altri progetti scritti in python o c++ per dimostrare che quanto detto ha una rilevanza verificata sui risultati ottenuti.
 
-Ps. i pesi degli mst calcolati sono inclusi nella cartella ex1aa all'interno del file mst.txt.
+I pesi degli mst calcolati sono inclusi nella cartella ex1aa all'interno del file mst.txt.
