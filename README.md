@@ -280,3 +280,31 @@ Per quanto riguarda l'implementazione, alcune note degne di menzione possono ess
 - scala come linguaggio di programmazione funzionale invece dei più comuni python o java.
 
 ## Grafici delle tempistiche
+
+### Kruskal naive
+
+![Alt text](ex1aa/kruskal-naive.png?raw=true "Kruskal Naive")
+
+---
+
+### Kruskal Union Find
+
+![Alt text](ex1aa/kruskal-uf-plot.png?raw=true "Kruskal Union Find")
+
+---
+
+### Heap Prim
+
+![Alt text](ex1aa/heap-prim.png?raw=true "Heap Prim")
+
+## Conclusioni
+
+Come si vede dai grafici, kruskal con union find è l'implementazione più efficiente data la sua complessità pari a O(mlog(n)) che è molto più veloce di kruskal naive (infatti ha complessità O(mn)).
+Una nota interessante è osservare che kruskal union find è altresì più veloce di heap prim che in teoria ha la stessa complessità asintotica.
+
+Ciò può essere spiegato dal fatto che heap prim utilizza in modo più estensivo strutture dati e oggetti creati dinamicamente. Questo fa si che sia meno efficiente anche se comunque riesce ad elaborare il grafo con 100 000 nodi in soli 20 secondi. (union find 4 secondi mentro kruskal naive adirittura 4 ore).
+
+Infine, è importante ricordare che anche il linguaggio gioca una parte importante e sicuramente l'allocazione di molti oggetti rende certe operazioni più onerose.
+Potrebbe essere interessante confrontare questi risultati con altri progetti scritti in python o c++ per dimostrare che quanto detto ha una rilevanza verificata sui risultati ottenuti.
+
+Ps. i pesi degli mst calcolati sono inclusi nella cartella ex1aa all'interno del file mst.txt.
