@@ -4,13 +4,11 @@ import com.typesafe.scalalogging.LazyLogging
 import example.graph.Graph._
 import example.struct.{Entry, Heap, UnionFind, VectorHeap}
 
-import java.util.concurrent.atomic.AtomicInteger
 import scala.annotation.tailrec
 
 /** Functions to create a minimum spanning tree for undirected weighted graphs.
   */
 object MST extends LazyLogging {
-  var counter = new AtomicInteger(0)
   type MST = Map[Int, Int]
 
   @tailrec
@@ -22,7 +20,6 @@ object MST extends LazyLogging {
     if (edgesAdjacentToU._2.isEmpty) (mst, heap) // trivial
     else {
       // update the key value
-      counter.incrementAndGet()
       if (heap.exist(edgesAdjacentToU._2.head.v).isDefined && edgesAdjacentToU._2.head.w < heap.key(edgesAdjacentToU._2.head.v)) {
 
         val updatedMst =
@@ -56,8 +53,6 @@ object MST extends LazyLogging {
     val heap    = VectorHeap(entries)                                                          // O(numVertices * log numVertices)
     // build mst recursively
     val mst     = recHeapPrim(heap, graph, Graph(graph.vertices, Nil))                         // O(numVertices * degree(v) * log(numVertices))
-    logger.info(s"counter is ${counter.get()}")
-    counter.set(0)
     mst
   }
 
@@ -65,13 +60,13 @@ object MST extends LazyLogging {
   private def recNaiveKruskal(mst: Graph, graph: Graph): Graph =
     if (graph.edges.isEmpty) mst // O(k)
     else {
-      if (isCyclic(mst, graph.edges.head)) { // O(numVertices * numEdges)
+      if (isCyclic(mst, graph.edges.head)) { // O(numEdges)
         // if the graph is cyclic then ignore the selected edge
         recNaiveKruskal(mst, Graph(graph.vertices, graph.edges.tail, graph.adjacencyList))
       } else {
         // otherwise add the edge to the graph, important: prepend on the list!
         recNaiveKruskal(
-          buildGraph(graph.edges.head +: mst.edges), // O(numEdges * numEdges)
+          buildGraph(graph.edges.head +: mst.edges), // O(numEdges)
           Graph(graph.vertices, graph.edges.tail, graph.adjacencyList)
         )
       }
@@ -81,7 +76,6 @@ object MST extends LazyLogging {
     val graphAfterSort = sortedGraph(graph)                               // TimSort O(numEdges * log(numEdges))
     val bufferMst      = Graph(Nil, Nil)                                  // used to check if cyclic O(k)
     val mst            = recNaiveKruskal(bufferMst, graphAfterSort)       // O(numEdges * numVertices)
-    //println(s"result mst is: ${mst.edges}")
     mst
   }
 

@@ -1,7 +1,6 @@
 package example.struct
 
 import scala.annotation.tailrec
-import scala.util.Try
 
 class VectorHeap[K: Ordering, V] private (vector: Vector[Entry[K, V]], map: Map[V, Int]) extends Heap[K, V] {
   private val keyOrdering = implicitly[Ordering[K]]
