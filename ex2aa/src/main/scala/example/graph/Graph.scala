@@ -50,7 +50,7 @@ object Graph extends LazyLogging {
             .map(_.map(_.toDouble))
 
           makeEdges2D(curr, rest)
-        case _ => makeEdgesGEO(ls)
+        case _ => Nil //makeEdgesGEO(ls)
       }
 
       (name, Graph.buildGraph(edges))

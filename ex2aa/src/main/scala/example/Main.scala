@@ -1,7 +1,7 @@
 package example
 
 import com.typesafe.scalalogging.LazyLogging
-import example.graph.Graph
+import example.graph.{Graph, TSP}
 import example.graph.Graph.{numEdges, numVertices}
 
 object Main extends App with LazyLogging {
@@ -14,4 +14,12 @@ object Main extends App with LazyLogging {
       |edges: ${numEdges(g._2)}
       |""".stripMargin)
   )
+
+  graphs.foreach(g => {
+    val tsp = TSP.nearestNeighbor(g._2)
+    logger.info(
+      s"""
+        |tsp w for ${g._1} is: ${tsp.edges.map(_.w).sum}
+        |""".stripMargin)
+  })
 }
