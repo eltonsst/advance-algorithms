@@ -2,11 +2,11 @@ package example.graph
 
 import com.typesafe.scalalogging.LazyLogging
 
-import scala.annotation.tailrec
-
 case class Graph(vertices: Seq[Int], edges: Seq[Edge])
 
 object Graph extends LazyLogging {
+  private type AdjacencyList = Map[Int, Seq[Edge]]
+
   def numVertices(graph: Graph): Int                           = graph.vertices.length
   def numEdges(graph: Graph): Int                              = graph.edges.length
 
@@ -35,6 +35,8 @@ object Graph extends LazyLogging {
     ???
   }
 
+  def sortedGraph(graph: Graph): Graph = Graph(graph.vertices, graph.edges.sortBy(_.w))
+
   def loadFromFile(): Seq[(String, Graph)] = {
     val wd = os.pwd / "src" / "main" / "resources" / "tsp_dataset"
     os.list(wd).map { file =>
@@ -53,8 +55,21 @@ object Graph extends LazyLogging {
         case _ => Nil //makeEdgesGEO(ls)
       }
 
-      (name, Graph.buildGraph(edges))
+      (name.toLowerCase, Graph.buildGraph(edges))
     }
+  }
+
+  def dfs(adjacencyList: AdjacencyList, u: Int, visited: Seq[Int]): Seq[Int] = {
+    if(visited.contains(u)) visited
+    else adjacencyList(u).foldLeft(u +: visited)((updatedVisited, e) => dfs(adjacencyList, e.v, updatedVisited))
+  }
+
+  def buildAdjList(edges: Seq[Edge]): AdjacencyList = {
+    val adjacencyList1 = edges.groupBy(_.u).toSeq
+    val adjacencyList2 = edges.map(e => Edge(u = e.v, v = e.u, w = e.w)).groupBy(_.u).toSeq
+    val adjacencyList3 = adjacencyList1 ++ adjacencyList2
+    val adjacencyList4 = adjacencyList3.flatMap(_._2).groupBy(_.u)
+    adjacencyList4
   }
 
 }
