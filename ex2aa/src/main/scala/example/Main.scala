@@ -19,7 +19,17 @@ object Main extends App with LazyLogging {
     val tsp = TSP.nearestNeighbor(g._2)
     logger.info(
       s"""
+        |NN
         |tsp w for ${g._1} is: ${tsp.edges.map(_.w).sum}
         |""".stripMargin)
+  })
+
+  graphs.foreach(g => {
+    val tsp = TSP.heldKarp(g._2)
+    logger.info(
+      s"""
+         |HELD KARP
+         |tsp w for ${g._1} is: ${tsp}
+         |""".stripMargin)
   })
 }
