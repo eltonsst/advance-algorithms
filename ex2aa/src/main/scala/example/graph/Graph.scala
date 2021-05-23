@@ -31,11 +31,37 @@ object Graph extends LazyLogging {
       edges ++ makeEdges2D(newCurr, newRest)
     }
 
-  private def makeEdgesGEO(ls: List[String]) : Seq[Edge] = {
-    ???
+  def sortedGraph(graph: Graph): Graph = Graph(graph.vertices, graph.edges.sortBy(_.w))
+
+  def computeEdgesGEO(curr: Array[Double], rest: List[Array[Double]]): Seq[Edge] = {
+    rest.map(that => {
+      val u = curr(0).toInt
+      val v = that(0).toInt
+
+      val pi = 3.141592
+      val xLat = pi * (curr(1).toInt + 5.0 * (curr(1) - curr(1).toInt) / 3.0) / 180.0
+      val xLong = pi * (curr(2).toInt + 5.0 * (curr(2) - curr(2).toInt) / 3.0) / 180.0
+      val yLat = pi * (that(1).toInt + 5.0 * (that(1) - that(1).toInt) / 3.0) / 180.0
+      val yLong = pi * (that(2).toInt + 5.0 * (that(2) - that(2).toInt) / 3.0) / 180.0
+      val q1 = math.cos(xLong - yLong)
+      val q2 = math.cos(xLat - yLat)
+      val q3 = math.cos(xLat - yLat)
+      val rrr = 6378.388
+
+      val w = (rrr * math.acos(0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)) + 1.0).toInt
+
+      Edge(u = u, v = v,  w = w)
+    })
   }
 
-  def sortedGraph(graph: Graph): Graph = Graph(graph.vertices, graph.edges.sortBy(_.w))
+  def makeEdgesGEO(curr: Array[Double], rest: List[Array[Double]]): Seq[Edge] = {
+    if(rest.isEmpty) Nil
+    else {
+      val edges = computeEdgesGEO(curr, rest)
+      val newCurr :: newRest = rest
+      edges ++ makeEdgesGEO(newCurr, newRest)
+    }
+  }
 
   def loadFromFile(): Seq[(String, Graph)] = {
     val wd = os.pwd / "src" / "main" / "resources" / "tsp_dataset"
@@ -46,13 +72,18 @@ object Graph extends LazyLogging {
 
       val edges = kindOfEdge.split(":")(1).trim match {
         case "EUC_2D" =>
-          val curr :: rest = ls
+          val first :: rest = ls
             .map(_.split(" ").filter(x => x.toDoubleOption.isDefined))
             .filter(_.nonEmpty)
             .map(_.map(_.toDouble))
 
-          makeEdges2D(curr, rest)
-        case _ => Nil //makeEdgesGEO(ls)
+          makeEdges2D(first, rest)
+        case _ =>
+          val first :: rest = ls
+            .map(_.split(" ").filter(x => x.toDoubleOption.isDefined))
+            .filter(_.nonEmpty)
+            .map(_.map(_.toDouble))
+          makeEdgesGEO(first, rest)
       }
 
       (name.toLowerCase, Graph.buildGraph(edges))
