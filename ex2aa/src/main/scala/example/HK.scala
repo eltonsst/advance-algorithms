@@ -3,6 +3,7 @@ package example
 import com.typesafe.scalalogging.LazyLogging
 import example.graph.{Graph, TSP}
 import example.graph.Graph.{numEdges, numVertices}
+import example.util.Util
 
 object HK extends App with LazyLogging {
   val graphs = Graph.loadFromFile()
@@ -16,11 +17,11 @@ object HK extends App with LazyLogging {
   )
 
   graphs.foreach(g => {
-    val tsp = TSP.heldKarp(g._2)
+    val tsp = Util.time(TSP.heldKarp(g._2))
     logger.info(
       s"""
          |HELD KARP
-         |tsp w for ${g._1} is: ${tsp}
+         |tsp w for ${g._1} is: ${tsp._2} in time ${tsp._1} s
          |""".stripMargin)
   })
 }

@@ -4,7 +4,7 @@ Relazione di Elton Stafa
 
 ## Introduzione
 
-L'obiettivo del progetto è quello di confrontare tra loro 3 diversi algoritmi per il problema del tsp:
+L' obiettivo del progetto è quello di confrontare tra loro 3 diversi algoritmi per il problema del tsp:
 - Nearest Neighbor
 - Algoritmo di Held-Karp
 - Algoritmo 2-approssimato
@@ -46,4 +46,145 @@ Durante il corso sono stati presentati i seguenti algoritmi in pseudocodifica:
             return mindist
          end if
       end function
+
+### Algoritmo 2-approssimato
+
+      function APPROX-2(G, c)
+         V = {v1, v2, ..., vn}
+         R = v1
+         T* = MST(G, c, R) // ottieni un mst con Prim etc.
+         H' = DFS(T*, R) // visita preorder
+         w  = COMPUTE(H') // calcola il peso
+         return w
+
+
+## Scelte implementative
+
+Per lo sviluppo del progetto ho scelto di utilizzare **Scala** (v2.13.4) con sbt (v1.5.0). Il motivo è di semplice preferenza personale, Scala come linguaggio funzionale permette di lavorare con oggetti immutabili e funzioni "high-order" che facilitano lo sviluppo, inoltre, non c'erano vincoli sul tipo di linguaggio da utilizzare.
+
+
+### Implementazione di Nearest Neighbor
+
+```scala
+  private def doNearestNeighbor(graph: Graph, s: Int, tsp: Graph): Graph = { // O(nm)
+    if(graph.edges.isEmpty) tsp
+    else {
+      val verticesInTsp = tsp.vertices.map(v => (v, v)).toMap
+      val nearest = graph.edges
+        // find nearest vertices not already inserted
+         .filter(e =>
+          (e.u == s && !verticesInTsp.contains(e.v))
+            || (e.v == s) && !verticesInTsp.contains(e.u)
+        )
+        // take the smallest Vk+1 in term of cost
+        .minByOption(_.w)
+      if(nearest.isDefined) {
+        val newS = if(s == nearest.get.v) nearest.get.u else nearest.get.v
+        val newTsp = Graph(newS +: tsp.vertices, nearest.get +: tsp.edges)
+        val newGraph = Graph(graph.vertices, graph.edges.filter(_ != nearest.get))
+        doNearestNeighbor(newGraph, newS, newTsp)
+      } else {
+        tsp
+      }
+    }
+  }
+```
+
+L' algoritmo è molto semplice e ricorsivo sul numero di lati. 
+Il caso base (nessun lato) ritorna direttamente il tsp, altrimenti, si recuperano tutti i nodi vicini a quello corrente 
+e si sceglie quello con distanza minima.
+
+In termini di complessità asintotica non è stato particolarmente ottimizzato con strutture dati a supporto (a parte semplici liste)
+dato che lo scopo per questo laboratorio è quello di ragionare sulla approssimazione dei risultati.
+
+L' algoritmo è comunque in grado di processare tutti i grafi in pochi secondi e rispecchia la 
+pseudocodifica presentata durante il corso.
+
+
+### Implementazione di Held Karp
+
+```scala
+private def doHeldKarp(graph: Graph, v: Int, S: Seq[Int], d: Map[(Int, Seq[Int]), Int]): Int = {
+    S match {
+      case s::Nil if s == v =>
+        graph.edges.find(e => e.u == v && e.v == 1).map(_.w)
+        .getOrElse(graph.edges.find(e => e.u == 1 && e.v == v).map(_.w).get)
+      case _ =>
+        if(d.contains((v, S))) d(v, S)
+        else {
+          val sMinusV = S.filter(_ != v)
+          var minDist = Int.MaxValue
+
+          sMinusV.foreach(u => {
+            val dist = doHeldKarp(graph, u, sMinusV, d)
+            val maybeMinDist =
+              dist + graph.edges.find(e => e.u == u && e.v == v).map(_.w)
+                .getOrElse(graph.edges.find(e => e.u == v && e.v == u).map(_.w).get)
+
+            if(maybeMinDist < minDist) {
+              minDist = maybeMinDist
+            }
+
+            // TIMEOUT
+            if((System.nanoTime() - t0) > 180.seconds.toNanos)
+              throw TimerException(minDist)
+
+          })
+          d.update((v, S), minDist)
+          minDist
+        }
+    }
+  }
+```
+L' algoritmo Held Karp ha una complessità esponenziale e utilizza quindi un timeout di 3 minuti per restituire un risultato che 
+potrebbe essere parziale. 
+
+Esso si basa sull' utilizzo di una mappa **d** che come chiave ha una tupla composta da un nodo v e un insieme di nodi S [(v, S)].
+Ogni entry della mappa conserva la somma delle distanze dal nodo di partenza fino a **v** che passa per i nodi dell' insieme S.
+
+La cosa interessante è che il numero di chiamate ricorsive è limitato superiormente dal numero di entry in **d** (notare il primo if che ritorna la distanza).
+Esse sono infatti al massimo **n · 2^n** perchè v è un nodo del grafo (ce ne sono n) ed S è un sottoinsieme di nodi.
+Quindi la complessità totale è **O(n^2 · 2^n)**. 
+
+### Implementazione dell' algoritmo 2-approssimato
+
+```scala
+  def approx2(graph: Graph): Int = {
+    val mst = MST.unionFindKruskal(graph)
+    val adjList = buildAdjList(mst.edges)
+    val path = dfs(adjList, 1, Nil)
+    val pathPath = path.prepended(1).toVector
+   
+    var w = 0
+    for(i <- path.indices) {
+      // must be one 
+      val edge = graph.edges
+        .find(e => (e.u == pathPath(i) && e.v == pathPath(i+1)) || (e.u == pathPath(i+1) && e.v == pathPath(i)))
+
+      w = w + edge.head.w
+    }
+    w
+  }
+```
+
+L' implementazione dell' algoritmo anche in questo caso è molto semplice, si parte calcolando un minimum spanning tree 
+per il grafo in input, successivamente si effettua una visita **dfs** sull' albero ottenuto e in questo modo si ottiene
+un cammino di nodi e per ognuno di essi si calcola la distanza con il successivo.
+
+Per calcolare l' mst ho deciso di utilizzare Kruskal con union find, in quanto più rapido e facile da integrare in questo 
+progetto. 
+
+La complessità asintotica dell' algoritmo è data dal calcolo dell' mst e quindi **O(m logn)**.
+
+Anche in questo ultimo caso l' algoritmo è conforme alla pseudo codifica.
+
+## Originalità introdotte nella implementazione
+
+Per quanto riguarda l' implementazione, alcune note degne di menzione possono essere:
+
+- utilizzo della notation @tailrec ove possibile per una ottimizzazione da parte del compilatore della ricorsione.
+- scala come linguaggio di programmazione funzionale invece dei più comuni python o java.
+
+## Grafici delle tempistiche
+
 
