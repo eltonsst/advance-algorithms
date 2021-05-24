@@ -41,18 +41,24 @@ object TSP {
 
   private def doHeldKarp(graph: Graph, v: Int, S: Seq[Int], d: scala.collection.mutable.Map[(Int, Seq[Int]), Int]): Int = {
     S match {
-      case s::Nil if s == v => graph.edges.filter(e => e.u == 1 && e.v == v).map(_.w).head
+      case s::Nil if s == v =>
+        graph.edges.find(e => e.u == v && e.v == 1).map(_.w)
+        .getOrElse(graph.edges.find(e => e.u == 1 && e.v == v).map(_.w).get)
       case _ =>
         if(d.contains((v, S))) d(v, S)
         else {
           val sMinusV = S.filter(_ != v)
           var minDist = Int.MaxValue
+
           sMinusV.foreach(u => {
             val dist = doHeldKarp(graph, u, sMinusV, d)
             val maybeMinDist =
-              dist + graph.edges.find(e => e.u == v && e.v == u).map(_.w)
-                .getOrElse(graph.edges.find(e => e.u == u && e.v == v).map(_.w).get)
-            if(maybeMinDist < minDist) minDist = maybeMinDist
+              dist + graph.edges.find(e => e.u == u && e.v == v).map(_.w)
+                .getOrElse(graph.edges.find(e => e.u == v && e.v == u).map(_.w).get)
+
+            if(maybeMinDist < minDist) {
+              minDist = maybeMinDist
+            }
 
             // TIMEOUT
             if((System.nanoTime() - t0) > 180.seconds.toNanos)
