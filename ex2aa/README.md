@@ -192,4 +192,22 @@ Per quanto riguarda l' implementazione, alcune note degne di menzione possono es
 
 ## Conclusioni
 
+- i dati sono stati riportati sulla tabella e sono stati calcolati gli errori sulla soluzione ottima per ogni grafo.
 
+- gli algoritmi si comportano diversamente per la varie istanze, per esempio held-karp a causa della sua complessità elevata 
+  restituisce delle soluzioni **parziali** per quasi tutti i grafi tranne uno: burma14, nella quale è stata trovata la soluzione ottima 
+  entro i 3 minuti imposti come timeout. 
+  Sarebbe stato possibile trovare le soluzioni ottime di ulysses16 e ulysses22 ottimizzando 
+  un po' di più l' algoritmo (ma non era lo scopo del laboratorio) oppure aumentando di qualche secondo il time limit.
+  
+  Interessante notare come l' euristica scelta (nearest neighbor) ritorni una soluzione di "buona" approssimazione anche se per 
+  definizione non abbiamo nessuna garanzia che ciò avvenga se non appunto delle ipotesi su come sia costruito il dataset.
+  
+  L' algoritmo 2-approssimato invece ritorna anch' esso delle soluzioni approssimate al più di un fattore uguale 2 e questa
+  oltre a essere una garanzia è anche confermata dai risultati ottenuti.
+  
+- per quanto concerne l' efficienza, l' algoritmo 2 approssimato ha mediamente i tempi migliori (agevolato dalla costruzione di mst con union find),
+  seguito da nearest neighbor ed infine Held Karp. 
+  Quest' ultimo però, idealmente è quello che con sufficiente tempo e memoria è in grado di fornire la soluzione esatta,
+  come dimostrato per il grafo burma14.
+  
