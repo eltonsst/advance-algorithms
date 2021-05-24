@@ -7,7 +7,7 @@ import scala.concurrent.duration.DurationInt
 import scala.util.Try
 
 
-case class TimerException(value: Int) extends Exception(value.toString)
+case class TimerException(tempValue: Double) extends Exception(tempValue.toString)
 
 object TSP {
   var t0: Long = System.nanoTime()
@@ -39,16 +39,16 @@ object TSP {
   def nearestNeighbor(graph: Graph): Graph =
     doNearestNeighbor(graph, 1, Graph(1 :: Nil, Nil))
 
-  private def doHeldKarp(graph: Graph, v: Int, S: Seq[Int], d: scala.collection.mutable.Map[(Int, Seq[Int]), Int]): Int = {
+  private def doHeldKarp(graph: Graph, v: Int, S: Seq[Int], d: scala.collection.mutable.Map[(Int, Seq[Int]), Double]): Double = {
     S match {
       case s::Nil if s == v =>
-        graph.edges.find(e => e.u == v && e.v == 1).map(_.w)
-        .getOrElse(graph.edges.find(e => e.u == 1 && e.v == v).map(_.w).get)
+        graph.edges.find(e => e.u == v && e.v == 3).map(_.w)
+        .getOrElse(graph.edges.find(e => e.u == 3 && e.v == v).map(_.w).get)
       case _ =>
         if(d.contains((v, S))) d(v, S)
         else {
           val sMinusV = S.filter(_ != v)
-          var minDist = Int.MaxValue
+          var minDist = Double.MaxValue
 
           sMinusV.foreach(u => {
             val dist = doHeldKarp(graph, u, sMinusV, d)
@@ -60,9 +60,8 @@ object TSP {
               minDist = maybeMinDist
             }
 
-            // TIMEOUT
-            if((System.nanoTime() - t0) > 180.seconds.toNanos)
-              throw TimerException(minDist)
+            //TIMEOUT
+            if((System.nanoTime() - t0) > 180.seconds.toNanos) throw TimerException(minDist)
 
           })
           d.update((v, S), minDist)
@@ -71,25 +70,26 @@ object TSP {
     }
   }
 
-  def heldKarp(graph: Graph): Int = {
+  def heldKarp(graph: Graph): Double = {
     t0 = System.nanoTime()
+    val d =  scala.collection.mutable.Map.empty[(Int, Seq[Int]), Double]
     val hkDist =
       Try{
-        doHeldKarp(graph, 1, graph.vertices, scala.collection.mutable.Map.empty)
+        doHeldKarp(graph, 3, graph.vertices, d)
       }.recover{
-        case e: TimerException => e.value
+        case e: TimerException => e.tempValue
       }
 
     hkDist.get
   }
 
-  def approx2(graph: Graph): Int = {
+  def approx2(graph: Graph): Double = {
     val mst = MST.unionFindKruskal(graph)
     val adjList = buildAdjList(mst.edges)
     val path = dfs(adjList, 1, Nil)
     val pathPath = path.prepended(1).toVector
     // no functional cause i'm tired
-    var w = 0
+    var w = 0.0
     for(i <- path.indices) {
       // must be one because the graph is complete
       val edge = graph.edges

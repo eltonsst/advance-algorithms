@@ -2,4 +2,4 @@ package example.graph
 
 /** Basic definition of an undirected weighted edge
   */
-case class Edge(u: Int, v: Int, w: Int)
+case class Edge(u: Int, v: Int, w: Double)

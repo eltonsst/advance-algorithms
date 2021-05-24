@@ -66,6 +66,7 @@ Per lo sviluppo del progetto ho scelto di utilizzare **Scala** (v2.13.4) con sbt
 ### Implementazione di Nearest Neighbor
 
 ```scala
+  @tailrec
   private def doNearestNeighbor(graph: Graph, s: Int, tsp: Graph): Graph = { // O(nm)
     if(graph.edges.isEmpty) tsp
     else {

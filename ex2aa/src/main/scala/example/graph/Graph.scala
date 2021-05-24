@@ -19,8 +19,8 @@ object Graph extends LazyLogging {
     rest.map(that =>  {
       val u = curr(0).toInt
       val v = that(0).toInt
-      val w = Math.sqrt(Math.pow(that(1) - curr(1), 2) + Math.pow(that(2) - curr(2), 2)).toInt
-      Edge(u = u, v = v,  w = w)
+      val w = Math.sqrt(Math.pow(that(1) - curr(1), 2) + Math.pow(that(2) - curr(2), 2))
+      Edge(u = u, v = v,  w = w.toInt)
     })
 
   private def makeEdges2D(curr: Array[Double], rest: List[Array[Double]]) : Seq[Edge] =
@@ -38,17 +38,17 @@ object Graph extends LazyLogging {
       val u = curr(0).toInt
       val v = that(0).toInt
 
-      val pi = 3.141592
-      val xLat = pi * (curr(1).toInt + 5.0 * (curr(1) - curr(1).toInt) / 3.0) / 180.0
-      val xLong = pi * (curr(2).toInt + 5.0 * (curr(2) - curr(2).toInt) / 3.0) / 180.0
-      val yLat = pi * (that(1).toInt + 5.0 * (that(1) - that(1).toInt) / 3.0) / 180.0
-      val yLong = pi * (that(2).toInt + 5.0 * (that(2) - that(2).toInt) / 3.0) / 180.0
+      val pi = math.Pi
+      val xLat = pi * (math.floor(curr(1)) + 5.0 * (math.floor(curr(1)) - math.floor(curr(1))) / 3.0) / 180.0
+      val xLong = pi * (math.floor(curr(2)) + 5.0 * (math.floor(curr(2)) - math.floor(curr(2))) / 3.0) / 180.0
+      val yLat = pi * (math.floor(that(1)) + 5.0 * (math.floor(that(1)) - math.floor(that(1))) / 3.0) / 180.0
+      val yLong = pi * (math.floor(that(2)) + 5.0 * (math.floor(that(2)) - math.floor(that(2))) / 3.0) / 180.0
       val q1 = math.cos(xLong - yLong)
       val q2 = math.cos(xLat - yLat)
-      val q3 = math.cos(xLat - yLat)
+      val q3 = math.cos(xLat + yLat)
       val rrr = 6378.388
 
-      val w = (rrr * math.acos(0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)) + 1.0).toInt
+      val w = math.floor(rrr * math.acos(0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)) + 1.0)
 
       Edge(u = u, v = v,  w = w)
     })
