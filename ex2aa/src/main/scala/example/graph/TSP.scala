@@ -42,8 +42,8 @@ object TSP {
   private def doHeldKarp(graph: Graph, v: Int, S: Seq[Int], d: scala.collection.mutable.Map[(Int, Seq[Int]), Double]): Double = {
     S match {
       case s::Nil if s == v =>
-        graph.edges.find(e => e.u == v && e.v == 3).map(_.w)
-        .getOrElse(graph.edges.find(e => e.u == 3 && e.v == v).map(_.w).get)
+        graph.edges.find(e => e.u == v && e.v == 1).map(_.w)
+        .getOrElse(graph.edges.find(e => e.u == 1 && e.v == v).map(_.w).get)
       case _ =>
         if(d.contains((v, S))) d(v, S)
         else {
@@ -75,7 +75,7 @@ object TSP {
     val d =  scala.collection.mutable.Map.empty[(Int, Seq[Int]), Double]
     val hkDist =
       Try{
-        doHeldKarp(graph, 3, graph.vertices, d)
+        doHeldKarp(graph, 1, graph.vertices, d)
       }.recover{
         case e: TimerException => e.tempValue
       }

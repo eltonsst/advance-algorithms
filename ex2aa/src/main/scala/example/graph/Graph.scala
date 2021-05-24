@@ -39,10 +39,10 @@ object Graph extends LazyLogging {
       val v = that(0).toInt
 
       val pi = math.Pi
-      val xLat = pi * (math.floor(curr(1)) + 5.0 * (math.floor(curr(1)) - math.floor(curr(1))) / 3.0) / 180.0
-      val xLong = pi * (math.floor(curr(2)) + 5.0 * (math.floor(curr(2)) - math.floor(curr(2))) / 3.0) / 180.0
-      val yLat = pi * (math.floor(that(1)) + 5.0 * (math.floor(that(1)) - math.floor(that(1))) / 3.0) / 180.0
-      val yLong = pi * (math.floor(that(2)) + 5.0 * (math.floor(that(2)) - math.floor(that(2))) / 3.0) / 180.0
+      val xLat = pi * (math.floor(curr(1)) + 5.0 * (curr(1) - math.floor(curr(1))) / 3.0) / 180.0
+      val xLong = pi * (math.floor(curr(2)) + 5.0 * (curr(2) - math.floor(curr(2))) / 3.0) / 180.0
+      val yLat = pi * (math.floor(that(1)) + 5.0 * (that(1) - math.floor(that(1))) / 3.0) / 180.0
+      val yLong = pi * (math.floor(that(2)) + 5.0 * (that(2) - math.floor(that(2))) / 3.0) / 180.0
       val q1 = math.cos(xLong - yLong)
       val q2 = math.cos(xLat - yLat)
       val q3 = math.cos(xLat + yLat)

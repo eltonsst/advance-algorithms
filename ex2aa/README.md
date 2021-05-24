@@ -188,4 +188,8 @@ Per quanto riguarda l' implementazione, alcune note degne di menzione possono es
 
 ## Grafici delle tempistiche
 
+![Tabella delle soluzioni](tab.png?raw=true "Tabella delle soluzioni")
+
+## Conclusioni
+
 
