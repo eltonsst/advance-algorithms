@@ -283,19 +283,19 @@ Per quanto riguarda l'implementazione, alcune note degne di menzione possono ess
 
 ### Kruskal naive
 
-![Kruskal naive](ex1aa/kruskal-naive.png?raw=true "Kruskal Naive")
+![Kruskal naive](kruskal-naive.png?raw=true "Kruskal Naive")
 
 ---
 
 ### Kruskal Union Find
 
-![Kruskal Union Find](ex1aa/kruskal-uf-plot.png?raw=true "Kruskal Union Find")
+![Kruskal Union Find](kruskal-uf-plot.png?raw=true "Kruskal Union Find")
 
 ---
 
 ### Heap Prim
 
-![Heap Prim](ex1aa/heap-prim.png?raw=true "Heap Prim")
+![Heap Prim](heap-prim.png?raw=true "Heap Prim")
 
 ## Conclusioni
 
