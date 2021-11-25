@@ -1,2 +1,2 @@
 # algoritmi-avanzati
-repo contenente gli appunti del corso di algoritmi.
+Minimum-Spanning-Tree (MST) and Traveling-Sales-Problem (TSP) all written in Scala
